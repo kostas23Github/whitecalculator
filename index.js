@@ -40,8 +40,8 @@ standardBtn.addEventListener('click', toggle);
 const addBtn = btn => {
     const cursorPosition = display.selectionStart; // to the left increaces
     const displayLength = display.value.length;
-    if (cursorPosition < displayLength) {
-        display.value = display.value.toString().substring(0, display.selectionStart) + btn.value + display.value.toString().substring(display.selectionStart);
+    if (cursorPosition < displayLength && !btn.className.includes("bsp")) { // Adds a value at the place of the cursor (only if the cursor is moved)
+        display.value = display.value.substring(0, display.selectionStart) + btn.value + display.value.substring(display.selectionStart);
     } else {
         let nameOfClass = btn.className;
         if (nameOfClass.includes("number")) {
@@ -61,7 +61,12 @@ const addBtn = btn => {
         } else if (nameOfClass.includes("delete")) {
             display.value = '';
         } else if (nameOfClass.includes("bsp")) {
-            display.value = display.value.toString().substring(0, display.value.toString().length - 1)
+            if (cursorPosition < displayLength) {
+                // If the cursor is moved delete the char prior to cursor
+                display.value = display.value.substring(0, cursorPosition - 1) + display.value.substring(cursorPosition);
+            } else { // delete the last char
+                display.value = display.value.substring(0, displayLength - 1)
+            }
         } else if (nameOfClass.includes('pi')) {
             display.value += Math.PI.toFixed(2);
         } else if (nameOfClass.includes('x2')) {
@@ -209,85 +214,109 @@ function factorialHandler(string) {
 // -> the func works with all combinations, except 5% @ 5% i.e. multiple %. two solutions -> one with for...in loop or recursive function. The first is easy, the 2nd needs some thinking
 const percentageHandler = string => {
     let array = string.split(''); // convert string to array
-    let index = array.indexOf('%'); // the first instance of %
-    let subArray = array.slice(0, index + 1); // a new array up to %(included)
-    let indexesToCut = subArray.length;
-    if (subArray[index - 1] === ')') { // check for parenth
-        console.log(`( exists`)
-        let i = index - 1; // i is index of )
-        while (i >= 0 && subArray[i] !== '(') {
-            i--; // when while ends i is index of (
+    // let index = array.indexOf('%'); // the first instance of %
+    let percArray = [];
+    for (let indexx in array) {
+        if (array[indexx] === '%') {
+            percArray.push(indexx);
         }
-        if (i === 0) {
-            console.log(`No calculations before (`)
-            let numberOfPerc = evaly(subArray.slice(i, index).join(''));
-            let perc = evaly(numberOfPerc/100);
-            array.splice(0, indexesToCut, perc);
-            return array.join('');
-        } else {
-            console.log(`calculations before (`)
-            let j = i - 1; // j is the index of operator before (
-            let calculations = evaly(subArray.slice(0, j).join('')); // calculates up untill the number before (
-            let numberOfPerc = evaly(subArray.slice(i, index).join('')); // calculates the inside of parenthesis, which is the number before %
-            let perc;
-            switch (subArray[j]) {
-                // In first 4 cases calculations exist prior to ( format=(5 @ ()% or 5 @ ()% @ 5)
-                case '+':
-                    perc = evaly(calculations + calculations * numberOfPerc / 100);
-                    break; 
-                case '-':
-                    perc = evaly(calculations - calculations * numberOfPerc / 100);
-                    break;
-                case '*':
-                    perc = evaly(calculations * numberOfPerc / 100);
-                    break;
-                case '/':
-                    perc = evaly(calculations / numberOfPerc / 100);
-                    break;
-                default: // nothing to return if reaches this casse probably an error or typo
-                    return 'error';
+    }
+    console.log(percArray);
+    // Now percArray has all indexes of %
+    let indexesToCut = 0;
+    percArray.forEach(index => {
+        let cutAdjuster = indexesToCut; // with each iteration the array changes and 
+        let subArray = array.slice(0, index);
+        indexesToCut = subArray.length + 1 - cutAdjuster;
+        console.log(`IndexesToCut: ${indexesToCut}`);
+        if (subArray[index - 1] === ')') { // check for parenth
+            console.log(`( exists`)
+            let i = index - 1; // i is index of )
+            while (i >= 0 && subArray[i] !== '(') {
+                i--; // when while ends i is index of (
             }
-            array.splice(0, indexesToCut, perc);
-            return array.join('');
-        }
-    } else { // no parenth
-        console.log(`no parenthesis before %`)
-        let i = index - 1;
-        while (i >= 0 && subArray[i] != '+' && subArray[i] != '-' && subArray[i] != '*' && subArray[i] != '/') {
-            i--;
-        }
-        //i is the index of the last operator prior to the number prior to %
-        // console.log(`IndexesToCut: ${indexesToCut}`);
-        let calculations = evaly(subArray.slice(0, i).join('')); // calculates up untill the number before %
-        let numberOfPerc = evaly(subArray.slice(i + 1, index).join('')); // gets the number of the perc
-        let perc;
-        // console.log(subArray[i]);
-        switch (subArray[i]) {
-            // In first 4 cases calculations exist prior to % format=(5 @ 5% or 5 @ 5% @ 5)
-            case '+':
-                perc = evaly(calculations + calculations * numberOfPerc / 100);
-                break;
-            case '-':
-                perc = evaly(calculations - calculations * numberOfPerc / 100);
-                break;
-            case '*':
-                perc = evaly(calculations * numberOfPerc / 100);
-                break;
-            case '/':
-                perc = evaly(calculations / numberOfPerc / 100);
-                break;
-            default:
+            if (i === 0) {
+                console.log(`No calculations before (`)
+                let numberOfPerc = evaly(subArray.slice(i, index).join(''));
+                let perc = evaly(numberOfPerc / 100);
+                array.splice(0, indexesToCut, perc);
+                return array.join('');
+            } else {
+                console.log(`calculations before (`)
+                let j = i - 1; // j is the index of operator before (
+                let calculations = evaly(subArray.slice(0, j).join('')); // calculates up untill the number before (
+                let numberOfPerc = evaly(subArray.slice(i, index).join('')); // calculates the inside of parenthesis, which is the number before %
+                let perc;
+                switch (subArray[j]) {
+                    // In first 4 cases calculations exist prior to ( format=(5 @ ()% or 5 @ ()% @ 5)
+                    case '+':
+                        perc = evaly(calculations + calculations * numberOfPerc / 100);
+                        break;
+                    case '-':
+                        perc = evaly(calculations - calculations * numberOfPerc / 100);
+                        break;
+                    case '*':
+                        perc = evaly(calculations * numberOfPerc / 100);
+                        break;
+                    case '/':
+                        perc = evaly(calculations / numberOfPerc / 100);
+                        break;
+                    default: // nothing to return if reaches this casse probably an error or typo
+                        return 'error';
+                }
+                array.splice(0, indexesToCut, perc);
+                return array.join('');
+            }
+        } else { // no parenth
+            console.log(`no parenthesis before %`)
+            let i = index - 1;
+            while (i >= 0 && subArray[i] != '+' && subArray[i] != '-' && subArray[i] != '*' && subArray[i] != '/') {
+                i--;
+            }
+            console.log(`i: ${i}`);
+            let perc;
+            if (i === -1) {
                 console.log(`only a number`)
                 // only number format=(5% or 5% @ 5)
-                perc = evaly(subArray.splice(0, index).join('') / 100); // From the subarray takes only the number, converts to string, divides by 100. evaly is redundant
+                perc = evaly(subArray.slice(0, index).join('') / 100); 
+                array.splice(0, indexesToCut, perc);
+            } else {
+                console.log('calculations before %')
+                console.log(subArray);
+                let calculations = evaly(subArray.slice(0, i).join(''));
+                console.log(`calculations: ${calculations}`) 
+                let numberOfPerc = evaly(subArray.slice(i + 1, indexesToCut).join('')); 
+                console.log(`numberOfPerc: ${numberOfPerc}`)
+                switch (subArray[i]) {
+                    case '+':
+                        perc = evaly(calculations + calculations * numberOfPerc / 100).toFixed(3);
+                        console.log(`perc: ${perc}`)
+                        break;
+                    case '-':
+                        perc = evaly(calculations - calculations * numberOfPerc / 100).toFixed(3);
+                        break;
+                    case '*':
+                        perc = evaly(calculations * numberOfPerc / 100).toFixed(3);
+                        break;
+                    case '/':
+                        perc = evaly(calculations / (numberOfPerc / 100)).toFixed(3);
+                        break;
+                    default:
+                        return 'error';
+
+                }
+                if (array[indexesToCut] === '%') {
+                    array.splice(0, indexesToCut + 1, perc);
+                } else {
+                    array.splice(0, indexesToCut, perc);
+                }
+            }
+            console.log(`perc: ${perc}`)
+            // array.splice(0, indexesToCut, perc); // cuts from the original array the subarray
+            console.log(`array: ${array}`)
         }
-        console.log(`perc: ${perc}`)
-        array.splice(0, indexesToCut, perc); // cuts from the original array the subarray
-        console.log(`array: ${array}`)
-        return array.join(''); // check
-        // let newString = array.join('');
-        // percentageHandler(newString);
-    }
+    })
+    return array.join('');
 }
 
 
