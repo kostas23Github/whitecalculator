@@ -1,8 +1,36 @@
+const calculator = document.querySelector('.calculator-container');
 const screen = document.querySelector('.screen');
 const display = document.querySelector('.display');
 const wrapperStandard = document.querySelector('.wrapper-standard');
 const wrapperScientific = document.querySelector('.wrapper-scientific');
+const scientificBtn = document.querySelector('.mode');
+const standardBtn = document.querySelector('.mode:last-child');
 
+
+const toggle = () => {
+    const scientificBtnStyles = window.getComputedStyle(scientificBtn); // gets all the css styles for the specific element
+    if (scientificBtnStyles.display === 'none') {
+        // standard calculator is visible
+        scientificBtn.style.display = 'flex';
+        standardBtn.style.display = 'none';
+        wrapperStandard.style.display = 'grid';
+        wrapperScientific.style.display = 'none';
+        screen.style.height = '70px';
+        calculator.style.width = '300px';
+        // calculator.style.animation = '100ms startle 1 linear';
+    } else if (scientificBtnStyles.display === 'flex') {
+        standardBtn.style.display = 'flex';
+        scientificBtn.style.display = 'none';
+        wrapperScientific.style.display = 'grid';
+        wrapperStandard.style.display = 'none';
+        screen.style.height = '100px';
+        calculator.style.width = 'min-content';
+        // calculator.style.animation = '300ms rotate 1 reverse';
+    }
+}
+
+scientificBtn.addEventListener('click', toggle);
+standardBtn.addEventListener('click', toggle);
 // display.addEventListener('click', () => {
 //     alert(display.selectionEnd)
 //     console.log(display.value.length)
@@ -25,9 +53,11 @@ const addBtn = btn => {
                 display.value += btn.value;
             }
         } else if (nameOfClass.includes("result")) {
-            display.value = evaly(forEvaly(display.value)).toFixed(2);
-            display.value = factorialHandler(display.value);
+            // display.value = factorialHandler(display.value);
+            display.value = percentageHandler(display.value);
+            // console.log(display.value);
             display.value = evaly(display.value);
+            // console.log(display.value);
         } else if (nameOfClass.includes("delete")) {
             display.value = '';
         } else if (nameOfClass.includes("bsp")) {
@@ -60,7 +90,7 @@ const addBtn = btn => {
         } else if (nameOfClass.includes("e")) {
             display.value += 'e';
         } else if (nameOfClass.includes('%')) {
-            display.value = display.value / 100 + '%';
+            display.value += '%';
         }
     }
 }
@@ -99,12 +129,14 @@ let strf = '3! + 3!'; // check
 //      **** FACTORIAL CALCULATOR ****
 function factorial(n) {
     // only round numbers 
-    if (n < 0 || Math.round(n) != n)
+    if (n < 0 || Math.round(n) != n) {
         return 'error';
-    // the returned value needs to be display.value = 'error'
-    if (n < 2)
+        // the returned value needs to be display.value = 'error'
+    } else if (n < 2) {
         return 1;
-    return n * factorial(n - 1);
+    } else {
+        return n * factorial(n - 1);
+    }
 }
 
 function factorialHandler(string) {
@@ -117,29 +149,39 @@ function factorialHandler(string) {
     for (index in arrStr) { // Iterate the array to find every !
         if (arrStr[index] === '!') { // Check for !
             // This if is an edge case e.g. string = ! || string = 3*!, throws error
+            // console.log(1);
             if ((index > 0) && (arrStr[index - 1] !== '+' && arrStr[index - 1] !== '-' && arrStr[index - 1] !== '*' && arrStr[index - 1] !== '/')) {
+                // console.log(2);
                 if (arrStr[index - 1] === ')') { // If char prior to ! is ), then the values btw () have to be calculated prior to the !.
+                    // console.log(3);
                     closingParenthesisIndex = index - 1; // index = !
                     let i = index - 2;
                     // This while loop will find the index of (
                     while (i >= 0 && !openParenthesisIndex) {
                         if (arrStr[i] === '(') {
                             openParenthesisIndex = i;
+                            break;
                         }
                         i--;
                     }
-                    subArray = arrStr.slice(openParenthesisIndex + 1, closingParenthesisIndex); // The elements btw parenthesis. array.slice doesn't slices the closingParenthesisIndex bc it goes up to the previous index
+                    // console.log(i);
+                    subArray = arrStr.slice(openParenthesisIndex + 1, closingParenthesisIndex); // The elements btw parenthesis. array.slice doesn't slice the closingParenthesisIndex bc it goes up to the previous index
+                    // console.log(4);
                     let valueForFactorial = evaly(subArray.join('')); // The calculated value btw () to be calculated its factorial
-                    arrStr.splice(openParenthesisIndex + 1, closingParenthesisIndex + 1 - openParenthesisIndex); // Remove the calculated values from the original array plus the !(closingParenthesisIndex + 1) except for one place(openParenthesisIndex + 1) for the factorial value to be. array.splice cuts the values from the first parameter(openParenthesisIndex), and as many as the second parameter
+                    // console.log(valueForFactorial);
+                    // console.log(arrStr); // check
+                    arrStr.splice(openParenthesisIndex + 1, index - openParenthesisIndex);
+                    // Remove the calculated values from the original array plus the !(closingParenthesisIndex + 1) except for one place(openParenthesisIndex + 1) for the factorial value to be. array.splice cuts the values from the first parameter(openParenthesisIndex), and as many as the second parameter
                     arrStr[openParenthesisIndex] = factorial(valueForFactorial); // The calculated factorial value is inserted at the place of the openParenthesisIndex
+                    // console.log(arrStr[openParenthesisIndex]);
                 } else {
                     let i = index - 1;
-                    // The while loop finds how many digits does the number prior ot the ! has.
+                    // The while loop finds how many digits does the number prior to the ! has.
                     while (i >= 0 && (arrStr[i] !== '+' && arrStr[i] !== '-' && arrStr[i] !== '*' && arrStr[i] !== '/')) {
                         i--;
                     }
                     subArray = arrStr.slice(i + 1, index); // the subarray is the digits of the number
-                    let valueForFactorial = subArray.join(''); // converted to a string for evaly calculation
+                    let valueForFactorial = evaly(subArray.join('')); // converted to a string for evaly calculation
                     arrStr.splice(i + 2, index - i - 1); // The places of the digits of the number are cut and in its first digit place the calculated factorial value is placed.
                     arrStr[i + 1] = factorial(valueForFactorial);
                 }
@@ -153,77 +195,111 @@ function factorialHandler(string) {
 }
 
 
-//tests
+// tests
 // let strp = '10%';
 // let strp = '1+10%';
 // let strp = '1 + (10 - 5)%';
 
 
-//      **** % CALCULATOR ****
+//  **** % CALCULATOR ****
 // ['5', '+', '1', '0', '+', '1', '0', '0', '+', '1', '0', '%']
-// const percentageHandler = string => {
-//     let arrStr = string.split('');
-//     let closingParenthesisIndex;
-//     let openParenthesisIndex;
-//     let subArray;
-//     let priorValue;
-//     let percentOfPrior;
-//     let finalValue;
-//     for (index in arrStr) {
-//         if (arrStr[index] === '%') {
-//             let i = index - 1;
-//             if (arrStr[i] === ')') {
-//                 // handles the 5 +- (5+6)% format
-//                 closingParenthesisIndex = i;
-//                 let newIndex = index - 2;
-//                 while (newIndex >= 0) {
-//                     if (newIndex === '(') {
-//                         openParenthesisIndex = newIndex;
-//                         break;
-//                     }
-//                     newIndex--;
-//                 }
-//                 subArray = arrStr.slice(openParenthesisIndex + 1, closingParenthesisIndex);
-//                 percentOfPrior = evaly(subArray.join(''));
-//                 // percentOfPrior in this case is the calculated value inside the parenthesis prior to the % symbol
-//                 arrStr.splice(openParenthesisIndex + 1, closingParenthesisIndex + 1);
-//                 arrStr[openParenthesisIndex] = percentOfPrior;
-//                 i = openParenthesisIndex - 1;
-//                 // now i have the value of the parenthesis and the index of the char before the openParenthesisIndex
-//                 switch (arrStr[i]) {
-//                     case '+':
-//                         priorValue = evaly(arrStr.slice(0, i).join(''));
-//                         finalValue = priorValue + percentOfPrior * priorValue / 100;
-//                     case '-':
-//                         priorValue = evaly(arrStr.slice(0, i).join(''));
-//                         finalValue = priorValue - percentOfPrior * priorValue / 100;
-//                 }
-//             } else {
-//                 // handles the 5 +- 5% format
-//                 while ((arrStr[i] !== '+' || arrStr[i] !== '-') && i >= 0) {
-//                     i--;
-//                 }
-//                 switch (arrStr[i]) {
-//                     case '+':
-//                         priorValue = evaly(arrStr.slice(0, i).join(''));
-//                         percentOfPrior = evaly(arrStr.slice(i + 1, index - 1).join(''));
-//                         finalValue = priorValue + percentOfPrior * priorValue / 100;
-//                     case '-':
-//                         priorValue = evaly(arrStr.slice(0, i).join(''));
-//                         percentOfPrior = evaly(arrStr.slice(i + 1, index - 1).join(''));
-//                         finalValue = priorValue - percentOfPrior * priorValue / 100;
-//                     default:
-//                         finalValue = string/100;
-//                 }
-//             }
-//         }
-//     }
-// }
+// Percent(%) is calculated as the sum of all previous numbers and then the percentage of that sum e.g. 5 + 6% = 5.3, 5 + 5 + 6% = 10.6
 
-// console.log(percentageHandler(str));
+//**********NOTE FOR TOMORROW*****************
+// -> the func works with all combinations, except 5% @ 5% i.e. multiple %. two solutions -> one with for...in loop or recursive function. The first is easy, the 2nd needs some thinking
+const percentageHandler = string => {
+    let array = string.split(''); // convert string to array
+    let index = array.indexOf('%'); // the first instance of %
+    let subArray = array.slice(0, index + 1); // a new array up to %(included)
+    let indexesToCut = subArray.length;
+    if (subArray[index - 1] === ')') { // check for parenth
+        console.log(`( exists`)
+        let i = index - 1; // i is index of )
+        while (i >= 0 && subArray[i] !== '(') {
+            i--; // when while ends i is index of (
+        }
+        if (i === 0) {
+            console.log(`No calculations before (`)
+            let numberOfPerc = evaly(subArray.slice(i, index).join(''));
+            let perc = evaly(numberOfPerc/100);
+            array.splice(0, indexesToCut, perc);
+            return array.join('');
+        } else {
+            console.log(`calculations before (`)
+            let j = i - 1; // j is the index of operator before (
+            let calculations = evaly(subArray.slice(0, j).join('')); // calculates up untill the number before (
+            let numberOfPerc = evaly(subArray.slice(i, index).join('')); // calculates the inside of parenthesis, which is the number before %
+            let perc;
+            switch (subArray[j]) {
+                // In first 4 cases calculations exist prior to ( format=(5 @ ()% or 5 @ ()% @ 5)
+                case '+':
+                    perc = evaly(calculations + calculations * numberOfPerc / 100);
+                    break; 
+                case '-':
+                    perc = evaly(calculations - calculations * numberOfPerc / 100);
+                    break;
+                case '*':
+                    perc = evaly(calculations * numberOfPerc / 100);
+                    break;
+                case '/':
+                    perc = evaly(calculations / numberOfPerc / 100);
+                    break;
+                default: // nothing to return if reaches this casse probably an error or typo
+                    return 'error';
+            }
+            array.splice(0, indexesToCut, perc);
+            return array.join('');
+        }
+    } else { // no parenth
+        console.log(`no parenthesis before %`)
+        let i = index - 1;
+        while (i >= 0 && subArray[i] != '+' && subArray[i] != '-' && subArray[i] != '*' && subArray[i] != '/') {
+            i--;
+        }
+        //i is the index of the last operator prior to the number prior to %
+        // console.log(`IndexesToCut: ${indexesToCut}`);
+        let calculations = evaly(subArray.slice(0, i).join('')); // calculates up untill the number before %
+        let numberOfPerc = evaly(subArray.slice(i + 1, index).join('')); // gets the number of the perc
+        let perc;
+        // console.log(subArray[i]);
+        switch (subArray[i]) {
+            // In first 4 cases calculations exist prior to % format=(5 @ 5% or 5 @ 5% @ 5)
+            case '+':
+                perc = evaly(calculations + calculations * numberOfPerc / 100);
+                break;
+            case '-':
+                perc = evaly(calculations - calculations * numberOfPerc / 100);
+                break;
+            case '*':
+                perc = evaly(calculations * numberOfPerc / 100);
+                break;
+            case '/':
+                perc = evaly(calculations / numberOfPerc / 100);
+                break;
+            default:
+                console.log(`only a number`)
+                // only number format=(5% or 5% @ 5)
+                perc = evaly(subArray.splice(0, index).join('') / 100); // From the subarray takes only the number, converts to string, divides by 100. evaly is redundant
+        }
+        console.log(`perc: ${perc}`)
+        array.splice(0, indexesToCut, perc); // cuts from the original array the subarray
+        console.log(`array: ${array}`)
+        return array.join(''); // check
+        // let newString = array.join('');
+        // percentageHandler(newString);
+    }
+}
 
-// Loop for btns of both calculators
-for (const btn of wrapperStandard.children && wrapperScientific.children) {
+
+
+
+
+// Loops for btns of both calculators
+for (const btn of wrapperStandard.children) {
+    btn.value = btn.innerHTML;
+    btn.addEventListener('click', () => addBtn(btn));
+}
+for (const btn of wrapperScientific.children) {
     btn.value = btn.innerHTML;
     btn.addEventListener('click', () => addBtn(btn));
 }
