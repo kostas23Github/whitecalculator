@@ -8,6 +8,7 @@
     <title>Calculator</title>
     <!-- LINKS -->
     <link rel="stylesheet" href="style.css">
+    <link rel="shortcut icon" href="./calc-favicon.ico" type="image/x-icon">
     <link rel="stylesheet"
     href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" />
     <script src="./index.js" defer></script>
@@ -17,7 +18,7 @@
     <main class="calculator-container">
         <div class="screen">
             <!-- prevents user from typing -->
-            <input onkeydown="return false;" class="display"></input>
+            <input onkeydown="return false;" class="display" maxlength="13"></input>
         </div>
         <div class="modes">
             <div class="mode btn">scientific</div>

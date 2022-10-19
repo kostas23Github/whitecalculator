@@ -141,6 +141,10 @@ html {
     background-color: transparent;
     outline: none;
     text-align: end;
+    /* display: flex; */
+    width: 90%;
+    /* flex-wrap: wrap; */
+    overflow-wrap: normal;
 }
 
 .wrapper-standard {

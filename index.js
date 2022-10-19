@@ -17,6 +17,7 @@ const toggle = () => {
         wrapperScientific.style.display = 'none';
         screen.style.height = '70px';
         calculator.style.width = '300px';
+        display.maxLength = '10';
         // calculator.style.animation = '100ms startle 1 linear';
     } else if (scientificBtnStyles.display === 'flex') {
         standardBtn.style.display = 'flex';
@@ -25,6 +26,7 @@ const toggle = () => {
         wrapperStandard.style.display = 'none';
         screen.style.height = '100px';
         calculator.style.width = 'min-content';
+        display.maxLength = '25';
         // calculator.style.animation = '300ms rotate 1 reverse';
     }
 }
@@ -40,7 +42,7 @@ standardBtn.addEventListener('click', toggle);
 const addBtn = btn => {
     const cursorPosition = display.selectionStart; // to the left increaces
     const displayLength = display.value.length;
-    if (cursorPosition < displayLength && !btn.className.includes("bsp")) { // Adds a value at the place of the cursor (only if the cursor is moved)
+    if (cursorPosition < displayLength && !btn.className.includes("bsp") && !btn.className.includes('delete') && !btn.className.includes('result')) { // Adds a value at the place of the cursor (only if the cursor is moved)
         display.value = display.value.substring(0, display.selectionStart) + btn.value + display.value.substring(display.selectionStart);
     } else {
         let nameOfClass = btn.className;
@@ -54,10 +56,14 @@ const addBtn = btn => {
             }
         } else if (nameOfClass.includes("result")) {
             // display.value = factorialHandler(display.value);
-            display.value = percentageHandler(display.value);
-            // console.log(display.value);
-            display.value = evaly(display.value);
-            // console.log(display.value);
+            // display.value = percentageHandler(display.value);
+            // display.value = evaly(display.value);
+            // if (display.value.split('.')[1].length > 5) {
+            //     display.value = evaly(display.value).toFixed(5);
+            // } else {
+            //     display.value = evaly(display.value);
+            // }
+            display.value = forEvaly(display.value)
         } else if (nameOfClass.includes("delete")) {
             display.value = '';
         } else if (nameOfClass.includes("bsp")) {
@@ -100,6 +106,7 @@ const addBtn = btn => {
     }
 }
 
+
 //      **** GEM ****
 const evaly = equation => {
     let result = Function(`return ` + equation)();
@@ -115,10 +122,26 @@ const ln = x => Math.log(x);
 const e = Math.E;
 const sqrt = x => Math.sqrt(x);
 const forEvaly = rawDisplayValue => {
-    // Changes unicode chars to strings for evaly in this case the sqrt unicode to the string 'sqrt'
-    let middleDisplayValue;
-    middleDisplayValue = rawDisplayValue.replaceAll('\u221A', 'sqrt');
-    let finalDisplayValue = middleDisplayValue;
+    // - Changes unicode chars to strings for evaly in this case the sqrt unicode to the string 'sqrt' 
+    // - passes raw value to functions
+    // - handles decimals
+    let middleValue;
+    middleValue = rawDisplayValue.replaceAll('\u221A', 'sqrt');
+    middleValue = factorialHandler(middleValue);
+    middleValue = percentageHandler(middleValue);
+    middleValue = evaly(middleValue).toString();
+    if (middleValue.includes('.') || evaly(middleValue).includ) {
+        if (middleValue.split('.')[1].length > 5) {
+            middleValue = evaly(middleValue).toFixed(5);
+            // if decimals more than 5 limits to 5
+        } else {
+            middleValue = middleValue;
+        }
+    } else if (evaly(middleValue).length > 5) {
+        middleValue = evaly(middleValue).toFixed(5);
+        // if calculated value greater than 5 chars limits to 5
+    }
+    let finalDisplayValue = middleValue;
     return finalDisplayValue;
 }
 
@@ -127,7 +150,7 @@ const forEvaly = rawDisplayValue => {
 // tests for factorial
 // let strf = '*!'; // check
 // let strf = '2*(2*4)!'; // check
-let strf = '3! + 3!'; // check
+// let strf = '3! + 3!'; // check
 // let strf = '(4.5*2)! +3+ (4.5*2)!'; // check 
 
 
@@ -221,7 +244,6 @@ const percentageHandler = string => {
             percArray.push(indexx);
         }
     }
-    console.log(percArray);
     // Now percArray has all indexes of %
     let indexesToCut = 0;
     percArray.forEach(index => {
@@ -278,14 +300,14 @@ const percentageHandler = string => {
             if (i === -1) {
                 console.log(`only a number`)
                 // only number format=(5% or 5% @ 5)
-                perc = evaly(subArray.slice(0, index).join('') / 100); 
+                perc = evaly(subArray.slice(0, index).join('') / 100);
                 array.splice(0, indexesToCut, perc);
             } else {
                 console.log('calculations before %')
                 console.log(subArray);
                 let calculations = evaly(subArray.slice(0, i).join(''));
-                console.log(`calculations: ${calculations}`) 
-                let numberOfPerc = evaly(subArray.slice(i + 1, indexesToCut).join('')); 
+                console.log(`calculations: ${calculations}`)
+                let numberOfPerc = evaly(subArray.slice(i + 1, indexesToCut).join(''));
                 console.log(`numberOfPerc: ${numberOfPerc}`)
                 switch (subArray[i]) {
                     case '+':
