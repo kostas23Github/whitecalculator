@@ -4,7 +4,9 @@ const display = document.querySelector('.display');
 const wrapperStandard = document.querySelector('.wrapper-standard');
 const wrapperScientific = document.querySelector('.wrapper-scientific');
 const scientificBtn = document.querySelector('.mode');
-const standardBtn = document.querySelector('.mode:last-child');
+const standardBtn = document.querySelector('.mode:nth-child(2)');
+const lightBtn = document.querySelector('.mode:nth-child(3)');
+const darkBtn = document.querySelector('.mode:nth-child(4)');
 
 
 const toggle = () => {
@@ -33,10 +35,6 @@ const toggle = () => {
 
 scientificBtn.addEventListener('click', toggle);
 standardBtn.addEventListener('click', toggle);
-// display.addEventListener('click', () => {
-//     alert(display.selectionEnd)
-//     console.log(display.value.length)
-// })
 
 //      **** HANDLER FOR WHEN CLICKING A BTN ****
 const addBtn = btn => {
@@ -354,7 +352,67 @@ for (const btn of wrapperScientific.children) {
     btn.value = btn.innerHTML;
     btn.addEventListener('click', () => addBtn(btn));
 }
+const toggleDarkMode = state => {
+    const allElements = document.querySelector('body').querySelectorAll('*'); // select all body elements
+    switch(state) {
+        case 'dark':
+            allElements.forEach(element=> element.classList.add('dark')); // append dark class to every body > element
+            // allElements.forEach(element=>console.log(element.classList)); // check line
+            lightBtn.style.display = 'flex';
+            darkBtn.style.display = 'none';
+            document.querySelector('body').style.backgroundColor = '#130604';
+            state = 'light';
+            break;
+        case 'light':
+            allElements.forEach(element=> element.classList.remove('dark'));
+            // allElements.forEach(element=>console.log(element.classList)); // check line
+            lightBtn.style.display = 'none';
+            darkBtn.style.display = 'flex';
+            document.querySelector('body').style.backgroundColor = 'white';
+            state = 'dark';
+            break;
+        default:
+            return;
+    }
+}
 
+lightBtn.addEventListener('click', () => {toggleDarkMode('light')});
+darkBtn.addEventListener('click', () => {toggleDarkMode('dark')});
+// const allElements = document.querySelector('body').querySelectorAll('*'); // select all body elements
+// allElements.forEach(element=> element.classList.add('dark'));
+// allElements.forEach(element=>console.log(element.classList));
+
+// const adjacentBorder = () => {
+//     const btns = Array.from(wrapperStandard.children);
+//     const hoverElement = document.querySelector('.btn:hover');
+//     const hoverIndex = btns.indexOf(hoverElement);
+//     // const adjacentTop = btns[hoverIndex - 4];
+//     // const adjacentBottom = btns[hoverIndex + 4];
+//     // const adjacentLeft = btns[hoverIndex - 1];
+//     const adjacentRight = btns[hoverIndex + 1];
+//     adjacentRight.style.border = '2px solid';
+//     adjacentRight.style.borderImage = 'linear-gradient(to right, #00aecd, #00090c 50%) 1';
+// }
+
+// const adjacentBorderRemove = () => {
+//     const btns = Array.from(wrapperStandard.children);
+//     const hoverElement = document.querySelector('.btn:hover');
+//     const hoverIndex = btns.indexOf(hoverElement);
+//     // const adjacentTop = btns[hoverIndex - 4];
+//     // const adjacentBottom = btns[hoverIndex + 4];
+//     // const adjacentLeft = btns[hoverIndex - 1];
+//     const adjacentRight = btns[hoverIndex + 1];
+//     adjacentRight.style.borderImage = 'none';
+//     adjacentRight.style.border = '0px solid';
+// }
+
+// for (const btn of wrapperStandard.children) {
+//     btn.addEventListener('mouseover', () => {
+//         adjacentBorder();
+//     });
+//     btn.addEventListener('mouseout', adjacentBorderRemove);
+//     btn.removeEventListener('mouseout', adjacentBorder);
+// }
 
 //          ****NOTES****
 //
