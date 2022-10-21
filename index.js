@@ -1,3 +1,6 @@
+// See NOTES.md for more info!
+
+//      **** DOM ELEMENTS ****
 const calculator = document.querySelector('.calculator-container');
 const screen = document.querySelector('.screen');
 const display = document.querySelector('.display');
@@ -9,34 +12,7 @@ const lightBtn = document.querySelector('.mode:nth-child(3)');
 const darkBtn = document.querySelector('.mode:nth-child(4)');
 
 
-const toggle = () => {
-    const scientificBtnStyles = window.getComputedStyle(scientificBtn); // gets all the css styles for the specific element
-    if (scientificBtnStyles.display === 'none') {
-        // standard calculator is visible
-        scientificBtn.style.display = 'flex';
-        standardBtn.style.display = 'none';
-        wrapperStandard.style.display = 'grid';
-        wrapperScientific.style.display = 'none';
-        screen.style.height = '70px';
-        calculator.style.width = '300px';
-        display.maxLength = '10';
-        // calculator.style.animation = '100ms startle 1 linear';
-    } else if (scientificBtnStyles.display === 'flex') {
-        standardBtn.style.display = 'flex';
-        scientificBtn.style.display = 'none';
-        wrapperScientific.style.display = 'grid';
-        wrapperStandard.style.display = 'none';
-        screen.style.height = '100px';
-        calculator.style.width = 'min-content';
-        display.maxLength = '25';
-        // calculator.style.animation = '300ms rotate 1 reverse';
-    }
-}
-
-scientificBtn.addEventListener('click', toggle);
-standardBtn.addEventListener('click', toggle);
-
-//      **** HANDLER FOR WHEN CLICKING A BTN ****
+//      **** HANDLER FOR WHEN CLICKING A BUTTON ****
 const addBtn = btn => {
     const cursorPosition = display.selectionStart; // to the left increaces
     const displayLength = display.value.length;
@@ -53,15 +29,12 @@ const addBtn = btn => {
                 display.value += btn.value;
             }
         } else if (nameOfClass.includes("result")) {
-            // display.value = factorialHandler(display.value);
-            // display.value = percentageHandler(display.value);
-            // display.value = evaly(display.value);
-            // if (display.value.split('.')[1].length > 5) {
-            //     display.value = evaly(display.value).toFixed(5);
-            // } else {
-            //     display.value = evaly(display.value);
-            // }
-            display.value = forEvaly(display.value)
+            try {
+                display.value = forEvaly(display.value);
+            } catch (error) {
+                // display.value = 'Error';
+                console.log(error);
+            }
         } else if (nameOfClass.includes("delete")) {
             display.value = '';
         } else if (nameOfClass.includes("bsp")) {
@@ -104,6 +77,76 @@ const addBtn = btn => {
     }
 }
 
+// Loops for btns of both calculators
+for (const btn of wrapperStandard.children) {
+    btn.value = btn.innerHTML;
+    btn.addEventListener('click', () => addBtn(btn));
+}
+for (const btn of wrapperScientific.children) {
+    btn.value = btn.innerHTML;
+    btn.addEventListener('click', () => addBtn(btn));
+}
+
+//      **** TOGGLE CALCULATOR ****
+const toggle = () => {
+    const scientificBtnStyles = window.getComputedStyle(scientificBtn); // gets all the css styles for the specific element
+    if (scientificBtnStyles.display === 'none') {
+        // standard calculator is visible
+        scientificBtn.style.display = 'flex';
+        standardBtn.style.display = 'none';
+        wrapperStandard.style.display = 'grid';
+        wrapperScientific.style.display = 'none';
+        screen.style.height = '70px';
+        calculator.style.width = '300px';
+        display.maxLength = '10';
+        calculator.style.animation = '100ms startle 1 linear';
+    } else if (scientificBtnStyles.display === 'flex') {
+        standardBtn.style.display = 'flex';
+        scientificBtn.style.display = 'none';
+        wrapperScientific.style.display = 'grid';
+        wrapperStandard.style.display = 'none';
+        screen.style.height = '100px';
+        calculator.style.width = 'min-content';
+        display.maxLength = '25';
+        calculator.style.animation = '300ms rotate 1 reverse';
+    }
+}
+
+//      **** TOGGLE CALCULATOR LISTENERS ****
+scientificBtn.addEventListener('click', toggle);
+standardBtn.addEventListener('click', toggle);
+
+//      **** TOGGLE DARK-LIGHT MODE ****
+const toggleDarkMode = state => {
+    const allElements = document.querySelector('body').querySelectorAll('*'); // select all body elements
+    switch(state) {
+        case 'dark':
+            allElements.forEach(element=> element.classList.add('dark')); // append dark class to every body > element
+            // allElements.forEach(element=>console.log(element.classList)); // check line
+            lightBtn.style.display = 'flex';
+            darkBtn.style.display = 'none';
+            document.querySelector('body').style.backgroundColor = '#130604';
+            state = 'light';
+            break;
+        case 'light':
+            allElements.forEach(element=> element.classList.remove('dark'));
+            // allElements.forEach(element=>console.log(element.classList)); // check line
+            lightBtn.style.display = 'none';
+            darkBtn.style.display = 'flex';
+            document.querySelector('body').style.backgroundColor = 'white';
+            state = 'dark';
+            break;
+        default:
+            return;
+    }
+}
+
+//      **** TOGGLE DARK-LIGHT MODE LISTENERS ****
+lightBtn.addEventListener('click', () => {toggleDarkMode('light')});
+darkBtn.addEventListener('click', () => {toggleDarkMode('dark')});
+
+
+//      **** EVALY FUNCTIONS ****
 
 //      **** GEM ****
 const evaly = equation => {
@@ -128,28 +171,20 @@ const forEvaly = rawDisplayValue => {
     middleValue = factorialHandler(middleValue);
     middleValue = percentageHandler(middleValue);
     middleValue = evaly(middleValue).toString();
-    if (middleValue.includes('.') || evaly(middleValue).includ) {
+    if (middleValue.includes('.')) {
         if (middleValue.split('.')[1].length > 5) {
             middleValue = evaly(middleValue).toFixed(5);
-            // if decimals more than 5 limits to 5
+            // if decimals are more than 5 limits to 5
         } else {
             middleValue = middleValue;
         }
     } else if (evaly(middleValue).length > 5) {
         middleValue = evaly(middleValue).toFixed(5);
-        // if calculated value greater than 5 chars limits to 5
+        // if calculated value greater than 5 chars, limits to 5
     }
     let finalDisplayValue = middleValue;
     return finalDisplayValue;
 }
-
-
-
-// tests for factorial
-// let strf = '*!'; // check
-// let strf = '2*(2*4)!'; // check
-// let strf = '3! + 3!'; // check
-// let strf = '(4.5*2)! +3+ (4.5*2)!'; // check 
 
 
 //      **** FACTORIAL CALCULATOR ****
@@ -165,7 +200,7 @@ function factorial(n) {
     }
 }
 
-function factorialHandler(string) {
+ function factorialHandler(string) {
     let arrStr = string.split(''); // Convert to array
     let openParenthesisIndex;
     let closingParenthesisIndex;
@@ -221,18 +256,10 @@ function factorialHandler(string) {
 }
 
 
-// tests
-// let strp = '10%';
-// let strp = '1+10%';
-// let strp = '1 + (10 - 5)%';
-
-
 //  **** % CALCULATOR ****
-// ['5', '+', '1', '0', '+', '1', '0', '0', '+', '1', '0', '%']
 // Percent(%) is calculated as the sum of all previous numbers and then the percentage of that sum e.g. 5 + 6% = 5.3, 5 + 5 + 6% = 10.6
 
-//**********NOTE FOR TOMORROW*****************
-// -> the func works with all combinations, except 5% @ 5% i.e. multiple %. two solutions -> one with for...in loop or recursive function. The first is easy, the 2nd needs some thinking
+
 const percentageHandler = string => {
     let array = string.split(''); // convert string to array
     // let index = array.indexOf('%'); // the first instance of %
@@ -338,109 +365,3 @@ const percentageHandler = string => {
     })
     return array.join('');
 }
-
-
-
-
-
-// Loops for btns of both calculators
-for (const btn of wrapperStandard.children) {
-    btn.value = btn.innerHTML;
-    btn.addEventListener('click', () => addBtn(btn));
-}
-for (const btn of wrapperScientific.children) {
-    btn.value = btn.innerHTML;
-    btn.addEventListener('click', () => addBtn(btn));
-}
-const toggleDarkMode = state => {
-    const allElements = document.querySelector('body').querySelectorAll('*'); // select all body elements
-    switch(state) {
-        case 'dark':
-            allElements.forEach(element=> element.classList.add('dark')); // append dark class to every body > element
-            // allElements.forEach(element=>console.log(element.classList)); // check line
-            lightBtn.style.display = 'flex';
-            darkBtn.style.display = 'none';
-            document.querySelector('body').style.backgroundColor = '#130604';
-            state = 'light';
-            break;
-        case 'light':
-            allElements.forEach(element=> element.classList.remove('dark'));
-            // allElements.forEach(element=>console.log(element.classList)); // check line
-            lightBtn.style.display = 'none';
-            darkBtn.style.display = 'flex';
-            document.querySelector('body').style.backgroundColor = 'white';
-            state = 'dark';
-            break;
-        default:
-            return;
-    }
-}
-
-lightBtn.addEventListener('click', () => {toggleDarkMode('light')});
-darkBtn.addEventListener('click', () => {toggleDarkMode('dark')});
-// const allElements = document.querySelector('body').querySelectorAll('*'); // select all body elements
-// allElements.forEach(element=> element.classList.add('dark'));
-// allElements.forEach(element=>console.log(element.classList));
-
-// const adjacentBorder = () => {
-//     const btns = Array.from(wrapperStandard.children);
-//     const hoverElement = document.querySelector('.btn:hover');
-//     const hoverIndex = btns.indexOf(hoverElement);
-//     // const adjacentTop = btns[hoverIndex - 4];
-//     // const adjacentBottom = btns[hoverIndex + 4];
-//     // const adjacentLeft = btns[hoverIndex - 1];
-//     const adjacentRight = btns[hoverIndex + 1];
-//     adjacentRight.style.border = '2px solid';
-//     adjacentRight.style.borderImage = 'linear-gradient(to right, #00aecd, #00090c 50%) 1';
-// }
-
-// const adjacentBorderRemove = () => {
-//     const btns = Array.from(wrapperStandard.children);
-//     const hoverElement = document.querySelector('.btn:hover');
-//     const hoverIndex = btns.indexOf(hoverElement);
-//     // const adjacentTop = btns[hoverIndex - 4];
-//     // const adjacentBottom = btns[hoverIndex + 4];
-//     // const adjacentLeft = btns[hoverIndex - 1];
-//     const adjacentRight = btns[hoverIndex + 1];
-//     adjacentRight.style.borderImage = 'none';
-//     adjacentRight.style.border = '0px solid';
-// }
-
-// for (const btn of wrapperStandard.children) {
-//     btn.addEventListener('mouseover', () => {
-//         adjacentBorder();
-//     });
-//     btn.addEventListener('mouseout', adjacentBorderRemove);
-//     btn.removeEventListener('mouseout', adjacentBorder);
-// }
-
-//          ****NOTES****
-//
-//          *UNICODE CHARS/LOGIC*
-// For js compatible unicode characters the format is:
-// '\uxxxx' where x are chars from the UTC-16
-// The format that they are found on the interent is:
-// U+xxxx
-// so i have to modify them in the above format.
-// Unicodes used in this project:
-// sqrt -> '\u221A'
-// exclamation mark -> '\u0021'
-
-
-//        *selectionStart/selectionEnd logic*
-// In this project they indicate in the input element where the cursor(focus) is. The value returned starts from 0 at the most left of the display.value and its greatest value is the rightest char or the last char typed. In short they count as we write. In this project is to show if the user has clicked somewhere in the display screen. It concludes that because the selectionStart/selectionEnd is always at the greatest possible value since the user can type by default only at the rightest position. So if the selectionStart/selectionEnd has a value lower than the length of chars of the display.value, the user has moved the place he/she types.
-// selectionStart/selectionEnd have always the same value since the user hasn't select anything, only the position of the cursor has changed.
-
-
-//          *evaly() logic*
-// This function is a safer version of the eval() see -> https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/eval. I gave the name evaly. Both functions can compute the value given even if it is a string.
-// e.g. evaly/eval(2+2); Logs 4
-//      evaly/eval('2+2'); Logs 4 also
-// They can also compute math functions
-//      evaly/eval('2*Math.sin(0)'); Logs 0
-
-
-//         *renaming trigonometry functions*
-//  I renamed them so that upon clicking the sin button "sin(" is added to the evaly func and to the display screen of the calculator. Then when = is clicked the evaly 'unstrings' the string display.value and sin calls Math.sin(). Evaly cannot compute straight away sin and the user cannot see Math.sin in their screen.
-//
-//
