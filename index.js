@@ -124,7 +124,6 @@ resultBtn.addEventListener('click', () => {
 //      **** BACK HISTORY LISTENER/FUNCTION ****
 // Upon clicking it the previous history text is shown
 back.addEventListener('click', () => {
-    // console.log('back is clicked');
     index = historyArray.indexOf(historyText.textContent);
     console.log(index);
     if (index > 0 && index <= historyArray.length - 1) {
@@ -143,7 +142,6 @@ back.addEventListener('click', () => {
 //      **** FORWARD HISTORY LISTENER/FUNCTION ****
 // Upon clicking it the next history text is shown
 forward.addEventListener('click', () => {
-    console.log('forward is clicked');
     index = historyArray.indexOf(historyText.textContent);
     console.log(index);
     if (index < historyArray.length - 1 && index >= 0) {
