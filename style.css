@@ -12,6 +12,7 @@ html {
     font-size: 100%;
     font: inherit;
     border-radius: 10px;
+    box-sizing: b-box;
 }
 
 main.calculator-container {
@@ -54,16 +55,20 @@ main.calculator-container {
     font-size: 2rem;
     display: flex;
     align-items: center;
-    justify-content: right;
+    justify-content: center;
 }
 
 .display {
     margin-right: 20px;
     background-color: transparent;
-    outline: none;
     text-align: end;
     width: 90%;
-    overflow-wrap: normal;
+    outline: none;
+}
+
+.history {
+    display: none;
+    font-size: 1rem;
 }
 
 /* SCIENTIFIC-STANDARD */
@@ -87,7 +92,9 @@ main.calculator-container {
 }
 
 .mode:nth-child(2),
-.mode:nth-child(3) {
+.mode:nth-child(3),
+.mode:nth-child(4), 
+.mode:nth-child(5) {
     display: none;
 }
 
@@ -180,10 +187,13 @@ main.dark>* {
 div.screen.dark {
     box-shadow: inset 1px 1px 5px 4px #d1211e,
         inset 10px 10px 10px 10px #340d07,
-        inset -10px -10px 10px 10px #340d07;
+        inset -10px -10px 10px 10px #340d07,
+        inset 20px 20px 20px 20px #230905,
+        inset -20px -20px 20px 20px #230905;
 }
 
-input.dark {
+input.dark,
+.history.dark {
     color: #d1211e;
 }
 
@@ -257,4 +267,32 @@ input.dark {
     100% {
         transform: scale(1.2);
     }
+}
+
+/* MOBILE PORTRAIT*/
+@media screen and (max-width: 500px) {
+    main.calculator-container {
+        /* transform: scale(0.68); */
+        margin: 30% auto;
+        width: 100%;
+    }
+
+    .mode.btn {
+        width: fit-content;
+    }
+    
+    .wrapper-scientific > .btn {
+        width: 40px;
+    }
+}
+
+/* MOBILE LANDSCAPE */
+@media screen and (max-height: 500px) {
+     main.calculator-container {
+        margin: 1% auto; 
+     }
+
+     .wrapper-scientific > .btn {
+        height: 30px;
+     }
 }
